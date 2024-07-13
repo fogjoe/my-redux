@@ -15,20 +15,33 @@ const App = () => {
     </appContext.Provider>
   )
 }
-const 大儿子 = () => (
-  <section>
-    大儿子
-    <User />
-  </section>
-)
-const 二儿子 = () => (
-  <section>
-    二儿子
-    <Wrapper />
-  </section>
-)
-const 幺儿子 = () => <section>幺儿子</section>
+const 大儿子 = () => {
+  console.log('大儿子执行了' + Math.random())
+
+  return (
+    <section>
+      大儿子
+      <User />
+    </section>
+  )
+}
+const 二儿子 = () => {
+  console.log('二儿子执行了' + Math.random())
+
+  return (
+    <section>
+      二儿子
+      <UserModifier>context</UserModifier>
+    </section>
+  )
+}
+const 幺儿子 = () => {
+  console.log('幺儿子执行了' + Math.random())
+
+  return <section>幺儿子</section>
+}
 const User = () => {
+  console.log('User执行了' + Math.random())
   const contextValue = useContext(appContext)
   return <div>User:{contextValue.appState.user.name}</div>
 }
@@ -47,27 +60,31 @@ const reducer = (state, { type, payload }) => {
   }
 }
 
-const Wrapper = () => {
-  const { appState, setAppState } = useContext(appContext)
+const connect = Component => {
+  const Wrapper = props => {
+    const { appState, setAppState } = useContext(appContext)
 
-  const dispatch = action => {
-    setAppState(reducer(appState, action))
+    const dispatch = action => {
+      setAppState(reducer(appState, action))
+    }
+
+    return <Component {...props} dispatch={dispatch} state={appState} />
   }
 
-  return <UserModifier dispatch={dispatch} state={appState} />
+  return Wrapper
 }
-const UserModifier = ({ dispatch, state }) => {
+
+const UserModifier = connect(({ dispatch, state, children }) => {
+  console.log('UserModifyer执行了' + Math.random())
   const onChange = e => {
-    // setAppState(reducer(appState, { type: 'updateUser', payload: { name: e.target.value } }))
     dispatch({ type: 'updateUser', payload: { name: e.target.value } })
-    // setAppState(reducer(appState, { type: 'updateGroup', payload: { name: e.target.value } }))
-    // setAppState(reducer(appState, { type: 'updateGroup', payload: { age: e.target.value } }))
   }
   return (
     <div>
+      {children}
       <input value={state.user.name} onChange={onChange} />
     </div>
   )
-}
+})
 
 export default App
