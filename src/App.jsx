@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React, { useState, useContext } from 'react'
 
 const appContext = React.createContext(null)
@@ -23,7 +24,7 @@ const 大儿子 = () => (
 const 二儿子 = () => (
   <section>
     二儿子
-    <UserModifier />
+    <Wrapper />
   </section>
 )
 const 幺儿子 = () => <section>幺儿子</section>
@@ -45,14 +46,26 @@ const reducer = (state, { type, payload }) => {
       return state
   }
 }
-const UserModifier = () => {
+
+const Wrapper = () => {
   const { appState, setAppState } = useContext(appContext)
+
+  const dispatch = action => {
+    setAppState(reducer(appState, action))
+  }
+
+  return <UserModifier dispatch={dispatch} state={appState} />
+}
+const UserModifier = ({ dispatch, state }) => {
   const onChange = e => {
-    setAppState(reducer(appState, { type: 'updateUser', payload: { name: e.target.value } }))
+    // setAppState(reducer(appState, { type: 'updateUser', payload: { name: e.target.value } }))
+    dispatch({ type: 'updateUser', payload: { name: e.target.value } })
+    // setAppState(reducer(appState, { type: 'updateGroup', payload: { name: e.target.value } }))
+    // setAppState(reducer(appState, { type: 'updateGroup', payload: { age: e.target.value } }))
   }
   return (
     <div>
-      <input value={appState.user.name} onChange={onChange} />
+      <input value={state.user.name} onChange={onChange} />
     </div>
   )
 }
