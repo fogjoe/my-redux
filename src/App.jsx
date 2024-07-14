@@ -1,14 +1,34 @@
 /* eslint-disable react/prop-types */
 import { connectToUser } from './connecters/connectToUser.js'
-import { store, connect, appContext } from './redux.jsx'
+import { connect,  createStore, Provider } from './redux.jsx'
+
+const initialState = {
+  user: { name: 'frank', age: 18 },
+  group: { name: '前端组' }
+}
+const reducer = (state, { type, payload }) => {
+  switch (type) {
+    case 'updateUser':
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          ...payload
+        }
+      }
+    default:
+      return state
+  }
+}
+const store = createStore(reducer, initialState)
 
 const App = () => {
   return (
-    <appContext.Provider value={store}>
+    <Provider store={store}>
       <大儿子 />
       <二儿子 />
       <幺儿子 />
-    </appContext.Provider>
+    </Provider>
   )
 }
 const 大儿子 = () => {

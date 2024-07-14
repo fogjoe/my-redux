@@ -1,10 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 
-export const store = {
-  state: {
-    user: { name: 'frank', age: 18 },
-    group: { name: '前端组' }
-  },
+const store = {
+  state: undefined,
+  reducer: undefined,
   setState(newState) {
     store.state = newState
     // 在每次更新的时候通知所有订阅者
@@ -21,20 +19,13 @@ export const store = {
     }
   }
 }
-const reducer = (state, { type, payload }) => {
-  switch (type) {
-    case 'updateUser':
-      return {
-        ...state,
-        user: {
-          ...state.user,
-          ...payload
-        }
-      }
-    default:
-      return state
-  }
+
+export const createStore = (reducer, initialState) => {
+  store.state = initialState
+  store.reducer = reducer
+  return store
 }
+
 const changed = (oldState, newState) => {
   let changed = false
 
@@ -49,7 +40,7 @@ const changed = (oldState, newState) => {
 export const connect = (selector, dispatchSelector) => Component => {
   const Wrapper = props => {
     const dispatch = action => {
-      setState(reducer(state, action))
+      setState(store.reducer(state, action))
     }
 
     const { state, setState, subscribe } = useContext(appContext)
@@ -78,4 +69,9 @@ export const connect = (selector, dispatchSelector) => Component => {
   return Wrapper
 }
 
-export const appContext = createContext(null)
+const appContext = createContext(null)
+
+// eslint-disable-next-line react/prop-types
+export const Provider = ({ children, store }) => {
+  return <appContext.Provider value={store}>{children}</appContext.Provider>
+}
