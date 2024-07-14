@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+import { connectToUser } from './connecters/connectToUser.js'
 import { store, connect, appContext } from './redux.jsx'
 
 const App = () => {
@@ -40,18 +41,13 @@ const 幺儿子 = connect(state => {
     </section>
   )
 })
-const User = connect(state => {
-  return { user: state.user }
-})(({ user }) => {
+
+const User = connectToUser(({ user }) => {
   console.log('User执行了' + Math.random())
   // 如果后端返回的数据形式为 state.xxx.yyy.zzz.user.name
   return <div>User:{user.name}</div>
 })
-const UserModifier = connect(null, dispatch => {
-  return {
-    updateUser: attrs => dispatch({ type: 'updateUser', payload: attrs })
-  }
-})(({ updateUser, state, children }) => {
+const UserModifier = connectToUser(({ updateUser, user, children }) => {
   console.log('UserModifier执行了' + Math.random())
   const onChange = e => {
     updateUser({ name: e.target.value })
@@ -59,7 +55,7 @@ const UserModifier = connect(null, dispatch => {
   return (
     <div>
       {children}
-      <input value={state.user.name} onChange={onChange} />
+      <input value={user.name} onChange={onChange} />
     </div>
   )
 })
