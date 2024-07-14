@@ -62,20 +62,34 @@ const 幺儿子 = connect(state => {
   )
 })
 
+const ajax = () => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve({data: {name: '3秒后的frank'}})
+    }, 3000)
+  })
+}
+const fetchUserPromise = () => {
+  return ajax('/user').then(response => response.data)
+}
+const fetchUser = (dispatch) => {
+  return ajax('/user').then(response => dispatch({type: 'updateUser', payload: response.data}))
+}
+
 const User = connectToUser(({ user }) => {
   console.log('User执行了' + Math.random())
   // 如果后端返回的数据形式为 state.xxx.yyy.zzz.user.name
   return <div>User:{user.name}</div>
 })
-const UserModifier = connectToUser(({ updateUser, user, children }) => {
+const UserModifier = connect(null, null)(({ dispatch, state, }) => {
   console.log('UserModifier执行了' + Math.random())
   const onChange = e => {
-    updateUser({ name: e.target.value })
+    // updateUser({ name: e.target.value })
+        dispatch({type: 'updateUser', payload: fetchUserPromise()})
   }
   return (
     <div>
-      {children}
-      <input value={user.name} onChange={onChange} />
+      <input value={state.user.name} onChange={onChange} />
     </div>
   )
 })
