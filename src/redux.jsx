@@ -31,7 +31,27 @@ const store = {
   }
 }
 
-const dispatch = store.dispatch
+let dispatch = store.dispatch
+
+const prevDispatch = dispatch
+dispatch = action => {
+  if (typeof action === 'function') {
+    action(dispatch)
+  } else {
+    prevDispatch(action)
+  }
+}
+
+const prevDispatch2 = dispatch
+dispatch = action => {
+  if ( action.payload instanceof Promise) {
+    action.payload.then(data => {
+      dispatch({...action, payload: data})
+    })
+  } else {
+    prevDispatch2(action)
+  }
+}
 
 export const createStore = (reducer, initialState) => {
   innerStore.state = initialState
