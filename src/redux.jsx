@@ -1,28 +1,41 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 
-const store = {
+const innerStore = {
   state: undefined,
   reducer: undefined,
-  setState(newState) {
-    store.state = newState
-    // 在每次更新的时候通知所有订阅者
-    store.listeners.forEach(fn => fn(store.state))
-  },
   listeners: [],
+  setState(newState) {
+    innerStore.state = newState
+    // 在每次更新的时候通知所有订阅者
+    innerStore.listeners.forEach(fn => fn(innerStore.state))
+  }
+}
+
+const store = {
+  getState() {
+    return innerStore.state
+  },
+
+  dispatch(action) {
+    innerStore.setState(innerStore.reducer(innerStore.state, action))
+  },
+
   subscribe(fn) {
-    store.listeners.push(fn)
+    innerStore.listeners.push(fn)
 
     // 在订阅完成之后希望可以删除此调用
     return () => {
-      const index = store.listeners.indexOf(fn)
-      store.listeners.splice(index, 1)
+      const index = innerStore.listeners.indexOf(fn)
+      innerStore.listeners.splice(index, 1)
     }
   }
 }
 
+const dispatch = store.dispatch
+
 export const createStore = (reducer, initialState) => {
-  store.state = initialState
-  store.reducer = reducer
+  innerStore.state = initialState
+  innerStore.reducer = reducer
   return store
 }
 
@@ -39,22 +52,18 @@ const changed = (oldState, newState) => {
 }
 export const connect = (selector, dispatchSelector) => Component => {
   const Wrapper = props => {
-    const dispatch = action => {
-      setState(store.reducer(state, action))
-    }
-
-    const { state, setState, subscribe } = useContext(appContext)
+    const { subscribe } = useContext(appContext)
 
     const [, update] = useState({})
 
-    const data = selector ? selector(state) : { state }
+    const data = selector ? selector(innerStore.state) : { state: innerStore.state }
 
     const dispatchers = dispatchSelector ? dispatchSelector(dispatch) : { dispatch }
 
     useEffect(
       () =>
         subscribe(() => {
-          const newData = selector ? selector(store.state) : { state: store.state }
+          const newData = selector ? selector(innerStore.state) : { state: innerStore.state }
           if (changed(data, newData)) {
             update({})
           }
