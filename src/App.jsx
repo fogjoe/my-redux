@@ -30,17 +30,25 @@ const 二儿子 = () => {
     </section>
   )
 }
-const 幺儿子 = () => {
+const 幺儿子 = connect(state => {
+  return { group: state.group }
+})(({ group }) => {
   console.log('幺儿子执行了' + Math.random())
-
-  return <section>幺儿子</section>
-}
-const User = connect(({ state }) => {
-  console.log('User执行了' + Math.random())
-  return <div>User:{state.user.name}</div>
+  return (
+    <section>
+      幺儿子: <div>Group: {group.name}</div>
+    </section>
+  )
 })
-const UserModifier = connect(({ dispatch, state, children }) => {
-  console.log('UserModifyer执行了' + Math.random())
+const User = connect(state => {
+  return { user: state.user }
+})(({ user }) => {
+  console.log('User执行了' + Math.random())
+  // 如果后端返回的数据形式为 state.xxx.yyy.zzz.user.name
+  return <div>User:{user.name}</div>
+})
+const UserModifier = connect()(({ dispatch, state, children }) => {
+  console.log('UserModifier执行了' + Math.random())
   const onChange = e => {
     dispatch({ type: 'updateUser', payload: { name: e.target.value } })
   }
